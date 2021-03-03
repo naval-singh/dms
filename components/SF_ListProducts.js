@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   root: {
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     padding: 1,
   },
@@ -233,7 +233,7 @@ export default function SF_ListProducts({props}) {
     return (
       <Provider>
         <Portal>
-          <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+          <Dialog visible={visible} onDismiss={() => setVisible(false)} style={{marginBottom: 100}}>
             <Dialog.Title>Search By Category</Dialog.Title>
             <Dialog.Content>
               <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
@@ -280,6 +280,7 @@ export default function SF_ListProducts({props}) {
     fetchData();
   }, []);
   return (
+    <>
     <View style={styles.root}>
       <View style={styles.searchView}>
         <TextInput
@@ -314,8 +315,8 @@ export default function SF_ListProducts({props}) {
           keyExtractor={(item) => item.productId.toString()}
         />
       )}
-
-      {ShowDialog()}
     </View>
+    {ShowDialog()}
+    </>
   );
 }

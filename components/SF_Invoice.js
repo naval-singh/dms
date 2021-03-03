@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useReducer} from 'react';
+import React, {useState, useEffect, useReducer, useCallback} from 'react';
 import {
   TextInput,
   Dimensions,
@@ -13,12 +13,28 @@ import {
   Image,
 } from 'react-native';
 import Icon3 from 'react-native-vector-icons/EvilIcons';
+import {useFocusEffect} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {getSyncData, storeDatasync} from './AsyncDataStorage';
 import {getDataForSF, postDataForSF} from './FetchNodeServices';
 const {width, height} = Dimensions.get('window');
 
 function Item({item, props}) {
+  const [background, setBackground] = useState('#fff');
+  const fetchInvoices = async() =>{
+    let data = await getSyncData('allInvoices')
+    Object.keys(data).map(val=>{
+      if(val == item.recordId){
+        setBackground('#daffd4')
+      }
+    })
+  }
+
+  useFocusEffect(
+    useCallback(()=>{
+      fetchInvoices()
+    },[])
+  )
   return (
     <TouchableOpacity
       onPress={() =>
@@ -35,7 +51,7 @@ function Item({item, props}) {
           style={{
             flex: 1,
             flexDirection: 'column',
-            backgroundColor: '#fff',
+            backgroundColor: background,
             borderRadius: 15,
             padding: 20,
           }}>
@@ -110,12 +126,12 @@ export default function SF_Invoice(props) {
       );
       // console.log('complete data......', list.invoice);
       await storeDatasync('invoice', list.invoice);
-      setList(list.invoice);
+      setList(list.invoice.length > 0 ? list.invoice : []);
       setLoading(false);
     } else {
       var data_category = await getSyncData('invoice');
-
-      setList(data_category);
+      setLoading(false)
+      setList(data_category.length > 0 ? data_category : []);
     }
   };
 
@@ -123,7 +139,17 @@ export default function SF_Invoice(props) {
 
   useEffect(function () {
     fetchData();
+    storeInvoices()
   }, []);
+
+  useFocusEffect(
+    useCallback(()=>{
+    },[])
+  )
+
+  const storeInvoices = async()=>{
+    await storeDatasync('allInvoices', invoice)
+  } 
 
   const handleSyncGrn = async () => {
     const body = Object.values(invoice);
@@ -139,6 +165,7 @@ export default function SF_Invoice(props) {
   };
 
   return (
+    <>
     <SafeAreaView style={styles.container}>
       <View
         style={{
@@ -184,6 +211,7 @@ export default function SF_Invoice(props) {
           </Text>
         </TouchableOpacity>
       </View>
+      
       {!network && (
         <>
           <FlatList
@@ -196,7 +224,7 @@ export default function SF_Invoice(props) {
         </>
       )}
       {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', marginTop: -100}}>
+        <View>
           <ActivityIndicator size="large" color="red" />
         </View>
       ) : getList.length > 0 ? (
@@ -207,20 +235,46 @@ export default function SF_Invoice(props) {
           showsVerticalScrollIndicator={false}
         />
       ) : (
-        <View style={{flex: 1, justifyContent: 'center', marginTop: -100}}>
+        <View>
           <Text>Nothing To Show</Text>
         </View>
       )}
     </SafeAreaView>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          justifyContent: 'flex-end',
+          width,
+        }}>
+        <TouchableOpacity
+          style={{width: width, backgroundColor: '#008ECC'}}
+          onPress={async()=>{
+            let data = await getSyncData('allInvoices')
+            console.warn(data)
+          }}>
+          <Text
+            style={{
+              textAlign: 'center',
+              color: '#FFF',
+              fontSize: 20,
+              fontWeight: 'bold',
+              padding: 15,
+            }}>
+            Submit
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
 
     alignItems: 'center',
-    // justifyContent:'center'
+    justifyContent:'center'
   },
   itemView: {
     flex: 1,
