@@ -29,7 +29,7 @@ const dateshow = (checkin) => {
 
 function Item({item, props}) {
   return (
-    <TouchableOpacity disabled>
+    <TouchableOpacity onPress={()=> props.navigation.navigate('SF_MyOrdersDetails', {product: item.soli})}>
       <View style={styles.item}>
         <View style={{width: width * 0.6}}>
           <Text style={{fontSize: 12, color: 'blue'}}>Order No</Text>
@@ -39,7 +39,7 @@ function Item({item, props}) {
 
         <View style={{width: width * 0.4}}>
           <Text style={{fontSize: 12, color: 'blue'}}>Amount</Text>
-          <Text style={{fontSize: 10}}>{item.totalAmount}</Text>
+          <Text style={{fontSize: 10}}>&#8377;&nbsp;{item.totalAmount}</Text>
           {item.orderStatus == 'Not Sync' ? (
             <Text style={{fontSize: 10, color: 'red'}}>{item.orderStatus}</Text>
           ) : (
@@ -139,7 +139,7 @@ export default function ShowMyOrders(props) {
         </>
       )}
       {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', marginTop: -100}}>
+        <View>
           <ActivityIndicator size="large" color="red" />
         </View>
       ) : (
@@ -156,7 +156,7 @@ export default function ShowMyOrders(props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
 
     alignItems: 'center',
     // justifyContent:'center'

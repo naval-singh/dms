@@ -16,6 +16,7 @@ import Splash from './Loader';
 import ShowMyOrders from './MyOrders';
 import SF_GrnHistory from './SF_GrnHistory';
 import SF_GrnHistoryDetails from './SF_GrnHistoryDetails';
+import SF_MyOrdersDetails from './SF_MyOrdersDetails';
 import SF_Login from './SF_Login';
 export default function ProjectStack(props) {
   const StackNav = createStackNavigator();
@@ -73,6 +74,11 @@ export default function ProjectStack(props) {
         name="SF_Login"
         component={SF_Login}
         options={{headerShown: false}}
+      />
+      <StackNav.Screen
+        name="SF_MyOrdersDetails"
+        component={SF_MyOrdersDetails}
+        options={{header: AppHeader}}
       />
 
       <StackNav.Screen

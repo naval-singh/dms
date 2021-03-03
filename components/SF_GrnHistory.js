@@ -112,7 +112,7 @@ export default function SF_GrnHistory(props) {
       setLoading(false);
     } else {
       var data_category = await getSyncData('grnHistory');
-
+      setLoading(false)
       setList(data_category);
     }
   };
@@ -162,7 +162,7 @@ export default function SF_GrnHistory(props) {
         </>
       )}
       {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', marginTop: -100}}>
+        <View>
           <ActivityIndicator size="large" color="red" />
         </View>
       ) : (
@@ -179,7 +179,7 @@ export default function SF_GrnHistory(props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
 
     alignItems: 'center',
     // justifyContent:'center'
