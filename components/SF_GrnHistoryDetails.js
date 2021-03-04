@@ -83,7 +83,7 @@ export default function SF_GrnHistoryDetails(props) {
 
       <View style={styles.mainHeadStyle}>
         <Text style={{fontSize: 14, marginTop: 10, marginBottom: 5}}>
-          All GRNs
+          GRN's Products
         </Text>
       </View>
 

@@ -2,22 +2,26 @@ import React, {useEffect, useState} from 'react';
 import {View} from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
 import Listproducts from './Listproducts';
-import SF_ListProducts from './SF_ListProducts';
 import ShowProduct from './ShowProduct';
-import SF_ShowProduct from './SF_ShowProduct';
-import SF_ShowCart from './SF_ShowCart';
-import SF_Invoice from './SF_Invoice';
-import SF_InvoiceDetails from './SF_InvoiceDetails';
 import ShowCart from './ShowCart';
 import AppHeader from './AppHeader';
-
 import {RootNavigator} from './NavigationDrw/RootNavigator';
+
 import Splash from './Loader';
-import ShowMyOrders from './MyOrders';
-import SF_GrnHistory from './SF_GrnHistory';
-import SF_GrnHistoryDetails from './SF_GrnHistoryDetails';
-import SF_MyOrdersDetails from './SF_MyOrdersDetails';
 import SF_Login from './SF_Login';
+import SF_Invoice from './SF_Invoice';
+import ShowMyOrders from './MyOrders';
+import SF_ShowCart from './SF_ShowCart';
+import SF_GrnHistory from './SF_GrnHistory';
+import SF_ShowProduct from './SF_ShowProduct';
+import SF_ListProducts from './SF_ListProducts';
+import SF_InvoiceDetails from './SF_InvoiceDetails';
+import SF_MyOrdersDetails from './SF_MyOrdersDetails';
+import SF_GrnHistoryDetails from './SF_GrnHistoryDetails';
+
+import SS_Sales from './SS_Sales';
+import SS_ListProducts from './SS_ListProducts';
+
 export default function ProjectStack(props) {
   const StackNav = createStackNavigator();
   return (
@@ -45,39 +49,58 @@ export default function ProjectStack(props) {
         component={SF_ShowProduct}
         options={{header: AppHeader}}
       />
+
       <StackNav.Screen
         name="SF_ShowCart"
         component={SF_ShowCart}
         options={{header: AppHeader}}
       />
+
       <StackNav.Screen
         name="SF_Invoice"
         component={SF_Invoice}
         options={{header: AppHeader}}
       />
+
       <StackNav.Screen
         name="SF_InvoiceDetails"
         component={SF_InvoiceDetails}
         options={{header: AppHeader}}
       />
+
       <StackNav.Screen
         name="SF_GrnHistory"
         component={SF_GrnHistory}
         options={{header: AppHeader}}
       />
+
       <StackNav.Screen
         name="SF_GrnHistoryDetails"
         component={SF_GrnHistoryDetails}
         options={{header: AppHeader}}
       />
+
       <StackNav.Screen
         name="SF_Login"
         component={SF_Login}
         options={{headerShown: false}}
       />
+
       <StackNav.Screen
         name="SF_MyOrdersDetails"
         component={SF_MyOrdersDetails}
+        options={{header: AppHeader}}
+      />
+
+      <StackNav.Screen
+        name="SS_Sales"
+        component={SS_Sales}
+        options={{header: AppHeader}}
+      />
+
+      <StackNav.Screen
+        name="SS_ListProducts"
+        component={SS_ListProducts}
         options={{header: AppHeader}}
       />
 

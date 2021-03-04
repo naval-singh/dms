@@ -90,17 +90,17 @@ export function DrawerContent(props) {
                 style={{marginBottom: -15}}
                 left={(props) => <Icon style={styles.btn} name="bars" />}>
                 <List.Item
-                  title="My Orders"
-                  onPress={() => props.navigation.navigate('order')}
+                  title="Sales"
+                  onPress={() => props.navigation.navigate('SS_Sales')}
                 />
-                <List.Item
+                {/* <List.Item
                   title="My Invoices"
                   onPress={() => props.navigation.navigate('SF_Invoice')}
                 />
                 <List.Item
                   title="Grn History"
                   onPress={() => props.navigation.navigate('SF_GrnHistory')}
-                />
+                /> */}
               </List.Accordion>
             </List.Section>
           </View>
