@@ -107,7 +107,10 @@ export default function SF_ListProducts({props}) {
     return (
       <TouchableOpacity
         onPress={() =>
-          props.navigation.navigate('SF_ShowProduct', {item: item})
+          props.navigation.navigate('SF_ShowProduct', {
+            item: item,
+            flag: 'distributor',
+          })
         }>
         <View
           style={{
@@ -188,6 +191,10 @@ export default function SF_ListProducts({props}) {
         wid: list.data.companyWareHouse.warehouseId,
         wn: list.data.companyWareHouse.warehouseName,
       });
+      await storeDatasync(
+        'data_distributorWarehouse',
+        list.data.distributorWareHouse,
+      );
       await storeDatasync('subcategory', list.data.productSubCategory);
       setSubcategoryList(list.data.productSubCategory);
       await storeDatasync('category', list.data.productCategory);
@@ -233,7 +240,10 @@ export default function SF_ListProducts({props}) {
     return (
       <Provider>
         <Portal>
-          <Dialog visible={visible} onDismiss={() => setVisible(false)} style={{marginBottom: 100}}>
+          <Dialog
+            visible={visible}
+            onDismiss={() => setVisible(false)}
+            style={{marginBottom: 100}}>
             <Dialog.Title>Search By Category</Dialog.Title>
             <Dialog.Content>
               <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
@@ -281,42 +291,42 @@ export default function SF_ListProducts({props}) {
   }, []);
   return (
     <>
-    <View style={styles.root}>
-      <View style={styles.searchView}>
-        <TextInput
-          style={styles.search}
-          placeholder="Search Product"
-          onChangeText={(txt) => filtering(txt.toLowerCase())}
-        />
-        <AICON
-          name="search1"
-          size={20}
-          color={'#000'}
-          style={{right: 30, padding: 5, alignSelf: 'center'}}
-        />
-        <AICON
-          name="filter"
-          style={{alignSelf: 'center', right: 25}}
-          size={20}
-          onPress={() => setVisible(true)}
-        />
-      </View>
-      <View>
-        <Text>{companyWarehouse.wn}</Text>
-      </View>
-      {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', marginTop: 300}}>
-          <ActivityIndicator size="large" color="red" />
+      <View style={styles.root}>
+        <View style={styles.searchView}>
+          <TextInput
+            style={styles.search}
+            placeholder="Search Product"
+            onChangeText={(txt) => filtering(txt.toLowerCase())}
+          />
+          <AICON
+            name="search1"
+            size={20}
+            color={'#000'}
+            style={{right: 30, padding: 5, alignSelf: 'center'}}
+          />
+          <AICON
+            name="filter"
+            style={{alignSelf: 'center', right: 25}}
+            size={20}
+            onPress={() => setVisible(true)}
+          />
         </View>
-      ) : (
-        <FlatList
-          data={getFilterList}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.productId.toString()}
-        />
-      )}
-    </View>
-    {ShowDialog()}
+        <View>
+          <Text>{companyWarehouse.wn}</Text>
+        </View>
+        {loading ? (
+          <View style={{flex: 1, justifyContent: 'center', marginTop: 300}}>
+            <ActivityIndicator size="large" color="red" />
+          </View>
+        ) : (
+          <FlatList
+            data={getFilterList}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.productId.toString()}
+          />
+        )}
+      </View>
+      {ShowDialog()}
     </>
   );
 }

@@ -16,6 +16,7 @@ import {Picker} from '@react-native-picker/picker';
 import InputSpinner from 'react-native-input-spinner';
 import {Divider} from 'react-native-paper';
 import {postDataForSF} from './FetchNodeServices';
+import SegmentedControlTab from 'react-native-segmented-control-tab';
 
 const {width, height} = Dimensions.get('window');
 const styles = StyleSheet.create({
@@ -25,6 +26,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 5,
     backgroundColor: '#FFF',
+  },
+  tabView: {
+    width: width * 0.95,
+    marginVertical: 10,
+    paddingBottom: 15,
   },
   itemView: {
     flex: 1,
@@ -45,7 +51,15 @@ export default function SF_ShowCart(props) {
   var length = Object.keys(cart).length;
   var cartitems = Object.values(cart);
 
+  const distributorCartItems = cartitems.filter(
+    (item) => item.flag === 'distributor',
+  );
+  const retailerCartItems = cartitems.filter(
+    (item) => item.flag === 'retailer',
+  );
+
   const [loading, setLoading] = useState();
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const [getState, setState] = useState(false);
   var dispatch = useDispatch();
@@ -62,26 +76,27 @@ export default function SF_ShowCart(props) {
   }
 
   const fetchData = async () => {
-    const user = await getSyncData('user');
-    if (network) {
-      var body = {
-        username: user.username,
-        password: user.password,
-      };
-      var list = await postDataForSF(
-        'https://p91field-dev-ed.my.salesforce.com/services/apexrest/GetInitData',
-        body,
-      );
-      //console.log(list.data.distributorWareHouse);
-      setDWH(list.data.distributorWareHouse);
-      await storeDatasync(
-        'data_distributorWarehouse',
-        list.data.distributorWareHouse,
-      );
-    } else {
-      var data_dhouse = await getSyncData('data_distributorWarehouse');
-      setDWH(data_dhouse);
-    }
+    const data_dhouse = await getSyncData('data_distributorWarehouse');
+    setDWH(data_dhouse);
+
+    // const user = await getSyncData('user');
+    // if (network) {
+    // var body = {
+    //   username: user.username,
+    //   password: user.password,
+    // };
+    // var list = await postDataForSF(
+    //   'https://p91field-dev-ed.my.salesforce.com/services/apexrest/GetInitData',
+    //   body,
+    // );
+    //console.log(list.data.distributorWareHouse);
+    // setDWH(list.data.distributorWareHouse);
+    // await storeDatasync(
+    //   'data_distributorWarehouse',
+    //   list.data.distributorWareHouse,
+    // );
+    // } else {
+    // }
   };
 
   const renderItem = ({item}) => {
@@ -220,7 +235,6 @@ export default function SF_ShowCart(props) {
         EMPID: user.userId, // User Id which we pass to get the data
       };
 
-      console.log('SF', body);
       if (!network) {
         setLoading(false);
         await storeDatasync(`${user.userId}`, body);
@@ -230,7 +244,7 @@ export default function SF_ShowCart(props) {
         Alert.alert('Order Placed');
         props.navigation.navigate('RootNavigator');
       } else if (network) {
-        console.log('2222');
+        // console.log('2222', body);
         var result = await postDataForSF(
           'https://p91field-dev-ed.my.salesforce.com/services/apexrest/CreateSalesOrder',
           body,
@@ -248,6 +262,67 @@ export default function SF_ShowCart(props) {
       Alert.alert('Please select your warehouse!');
     }
   };
+
+  const renderCartThings = (traversingItems) => {
+    return (
+      <>
+        <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
+          <Picker
+            selectedValue={getDWHId}
+            style={{height: 50, width: width * 0.7}}
+            onValueChange={(itemValue, itemIndex) => setDWHId(itemValue)}>
+            <Picker.Item label="~Distributor Warehose~" value="" />
+            {fillDWH()}
+          </Picker>
+        </View>
+        <View
+          style={{
+            fontSize: 18,
+            width: width * 0.98,
+            padding: 5,
+            flexDirection: 'row',
+            marginTop: 10,
+            marginBottom: 10,
+          }}>
+          <Text style={{fontSize: 18, textAlign: 'left'}}>
+            Subtotal({length} items):
+          </Text>
+          <Text style={{color: '#c0392b', fontSize: 18, textAlign: 'left'}}>
+            {' '}
+            &#8377; {total}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={{
+            width: width * 0.95,
+            borderWidth: 0.5,
+            borderColor: '#000',
+            borderRadius: 5,
+            backgroundColor: '#fdcb6e',
+            marginBottom: 10,
+          }}
+          onPress={() => handleAddToCart()}>
+          <Text
+            style={{
+              textAlign: 'center',
+              color: '#000',
+              fontSize: 20,
+              fontWeight: 'bold',
+              padding: 15,
+            }}>
+            Place Order
+          </Text>
+        </TouchableOpacity>
+
+        <FlatList
+          data={traversingItems}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.productId.toString()}
+        />
+      </>
+    );
+  };
+
   return (
     <>
       {loading ? (
@@ -256,59 +331,25 @@ export default function SF_ShowCart(props) {
         </View>
       ) : (
         <View style={styles.root}>
-          <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
-            <Picker
-              selectedValue={getDWHId}
-              style={{height: 50, width: width * 0.7}}
-              onValueChange={(itemValue, itemIndex) => setDWHId(itemValue)}>
-              <Picker.Item label="~Distributor Warehose~" value="" />
-              {fillDWH()}
-            </Picker>
+          <View style={styles.tabView}>
+            <SegmentedControlTab
+              values={['Primary Sales', 'Secondary Sales']}
+              selectedIndex={selectedIndex}
+              borderRadius={10}
+              tabTextStyle={{fontSize: 18, color: '#008ECC'}}
+              tabStyle={{borderColor: '#008ECC'}}
+              activeTabStyle={{backgroundColor: '#008ECC'}}
+              onTabPress={(index) => {
+                setSelectedIndex(index);
+                console.log('all Items.............', cartitems);
+                console.log('distri............', distributorCartItems);
+                console.log('retail............', retailerCartItems);
+              }}
+            />
           </View>
-          <View
-            style={{
-              fontSize: 18,
-              width: width * 0.98,
-              padding: 5,
-              flexDirection: 'row',
-              marginTop: 10,
-              marginBottom: 10,
-            }}>
-            <Text style={{fontSize: 18, textAlign: 'left'}}>
-              Subtotal({length} items):
-            </Text>
-            <Text style={{color: '#c0392b', fontSize: 18, textAlign: 'left'}}>
-              {' '}
-              &#8377; {total}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={{
-              width: width * 0.95,
-              borderWidth: 0.5,
-              borderColor: '#000',
-              borderRadius: 5,
-              backgroundColor: '#fdcb6e',
-              marginBottom: 10,
-            }}
-            onPress={() => handleAddToCart()}>
-            <Text
-              style={{
-                textAlign: 'center',
-                color: '#000',
-                fontSize: 20,
-                fontWeight: 'bold',
-                padding: 15,
-              }}>
-              Place Order
-            </Text>
-          </TouchableOpacity>
-
-          <FlatList
-            data={cartitems}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.productId.toString()}
-          />
+          {selectedIndex == 0
+            ? renderCartThings(distributorCartItems)
+            : renderCartThings(retailerCartItems)}
         </View>
       )}
     </>

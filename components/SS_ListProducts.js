@@ -97,15 +97,18 @@ export default function SF_ListProducts(props) {
   const [retailerDetail, setRetailerDetail] = useState(
     props.route.params.retailer,
   );
-
-  const [companyWarehouse, setCompanyWarehouse] = useState({wid: '', wn: ''});
+  const [selectedWareHouse, setSelectedWareHouse] = useState('');
+  const [distributorWarehouse, setDistributorWarehouse] = useState([]);
   var network = useSelector((state) => state.network);
   const renderItem = ({item}) => {
     let base64Image = item.image;
     return (
       <TouchableOpacity
         onPress={() =>
-          props.navigation.navigate('SF_ShowProduct', {item: item})
+          props.navigation.navigate('SF_ShowProduct', {
+            item: item,
+            flag: 'retailer',
+          })
         }>
         <View
           style={{
@@ -161,9 +164,25 @@ export default function SF_ListProducts(props) {
     });
   };
 
+  const fillWareHouses = () => {
+    return distributorWarehouse.map((item) => {
+      return (
+        <Picker.Item
+          key={item.warehouseId}
+          label={item.warehouseName}
+          value={item.warehouseId}
+        />
+      );
+    });
+  };
+
   const fetchData = async () => {
+    const data_dhouse = await getSyncData('data_distributorWarehouse');
+    setDistributorWarehouse(data_dhouse);
+    console.warn({data_dhouse});
+
     if (network) {
-      let user = await getSyncData('user');
+      const user = await getSyncData('user');
 
       var list = await getDataForSF(
         `https://p91field-dev-ed.my.salesforce.com/services/apexrest/GetSecondaryData?EMPID=${user.userId}`,
@@ -171,31 +190,30 @@ export default function SF_ListProducts(props) {
 
       await storeDatasync('SS_Products', list.data.productList);
       if (retailerDetail.taggedWarehouse.warehouseId != null) {
-        const wareHouseWiseProducts = list.data.productList.filter(
-          (item) =>
-            item.warehouseId == retailerDetail.taggedWarehouse.warehouseId,
-        );
-        console.warn(retailerDetail.taggedWarehouse);
-        setList(wareHouseWiseProducts);
-        setFilterList(wareHouseWiseProducts);
-        setCompanyWarehouse({
-          wid: retailerDetail.taggedWarehouse.warehouseId,
-          wn: retailerDetail.taggedWarehouse.warehouseName,
-        });
+        setList(list.data.productList);
+        setSelectedWareHouse(retailerDetail.taggedWarehouse.warehouseId);
+
+        if (retailerDetail.taggedWarehouse.warehouseId !== '') {
+          const filteredProductList = list.data.productList.filter(
+            (item) =>
+              item.warehouseId === retailerDetail.taggedWarehouse.warehouseId,
+          );
+          setFilterList(filteredProductList);
+          console.warn(filteredProductList);
+          console.log('filter function');
+        } else {
+          setFilterList(list.data.productList);
+        }
       } else {
         setList(list.data.productList);
         setFilterList(list.data.productList);
-        setCompanyWarehouse({
-          wid: null,
-          wn: 'All Warehouse',
-        });
       }
       setLoading(false);
 
       //   console.log('COMPANY', list.data.productCategory);
       // await storeDatasync('companywarehouse', list.data.companyWareHouse);
 
-      //   setCompanyWarehouse({
+      //   setDistributorWarehouse({
       //     wid: list.data.companyWareHouse.warehouseId,
       //     wn: list.data.companyWareHouse.warehouseName,
       //   });
@@ -205,33 +223,31 @@ export default function SF_ListProducts(props) {
       //   setCategoryList(list.data.productCategory);
     } else {
       const product_data = await getSyncData('SS_Products');
-      //   console.warn(product_data);
+
       if (retailerDetail.taggedWarehouse.warehouseId != null) {
-        const wareHouseWiseProducts = product_data.filter(
-          (item) =>
-            item.warehouseId == retailerDetail.taggedWarehouse.warehouseId,
-        );
-        console.warn(retailerDetail.taggedWarehouse);
-        setList(wareHouseWiseProducts);
-        setFilterList(wareHouseWiseProducts);
-        setCompanyWarehouse({
-          wid: retailerDetail.taggedWarehouse.warehouseId,
-          wn: retailerDetail.taggedWarehouse.warehouseName,
-        });
+        setList(product_data);
+        setSelectedWareHouse(retailerDetail.taggedWarehouse.warehouseId);
+
+        if (retailerDetail.taggedWarehouse.warehouseId !== '') {
+          const filteredProductList = product_data.filter(
+            (item) =>
+              item.warehouseId === retailerDetail.taggedWarehouse.warehouseId,
+          );
+          setFilterList(filteredProductList);
+        } else {
+          setFilterList(product_data);
+        }
       } else {
         setList(product_data);
         setFilterList(product_data);
-        setCompanyWarehouse({
-          wid: null,
-          wn: 'All Warehouse',
-        });
       }
       setLoading(false);
+
       //   var data_product = await getSyncData('products');
 
       //   var data_subcategory = await getSyncData('subcategory');
       //   var data_category = await getSyncData('category');
-      //   setCompanyWarehouse({
+      //   setDistributorWarehouse({
       //     wid: data_companywarehouse.warehouseId,
       //     wn: data_companywarehouse.warehouseName,
       //   });
@@ -273,13 +289,13 @@ export default function SF_ListProducts(props) {
   //             <Dialog.Title>Search By Category</Dialog.Title>
   //             <Dialog.Content>
   //               <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
-  //                 <Picker
-  //                   selectedValue={category}
-  //                   style={{height: 50, width: width * 0.7}}
-  //                   onValueChange={(value) => setCategory(value)}>
-  //                   <Picker.Item label="~Category~" value="" />
-  //                   {fillCategories()}
-  //                 </Picker>
+  // <Picker
+  //   selectedValue={category}
+  //   style={{height: 50, width: width * 0.7}}
+  //   onValueChange={(value) => setCategory(value)}>
+  //   <Picker.Item label="~Category~" value="" />
+  //   {fillCategories()}
+  // </Picker>
   //               </View>
   //               <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
   //                 <Picker
@@ -301,6 +317,18 @@ export default function SF_ListProducts(props) {
   //       </Provider>
   //     );
   //   };
+
+  const handleWareHouseFilter = (value) => {
+    setSelectedWareHouse(value);
+    if (value !== '') {
+      const filteredProductList = getList.filter(
+        (item) => item.warehouseId === value,
+      );
+      setFilterList(filteredProductList);
+    } else {
+      setFilterList(getList);
+    }
+  };
 
   const filtering = (search) => {
     var arr = [];
@@ -338,7 +366,14 @@ export default function SF_ListProducts(props) {
           /> */}
         </View>
         <View>
-          <Text>{companyWarehouse.wn}</Text>
+          <Picker
+            mode="dropdown"
+            selectedValue={selectedWareHouse}
+            style={{height: 30, width: width * 0.45}}
+            onValueChange={handleWareHouseFilter}>
+            <Picker.Item label="All Warehouse" value="" />
+            {fillWareHouses()}
+          </Picker>
         </View>
         {loading ? (
           <View style={{flex: 1, justifyContent: 'center', marginTop: 300}}>
