@@ -63,7 +63,8 @@ export default function SF_ShowCart(props) {
 
   const [getState, setState] = useState(false);
   var dispatch = useDispatch();
-  var total = cartitems.reduce(calculate, 0);
+  var distributorTotal = distributorCartItems.reduce(calculate, 0);
+  var retailerTotal = retailerCartItems.reduce(calculate, 0);
   const [getList, setList] = useState(cartitems);
   const [getDWH, setDWH] = useState([]);
   const [getDWHId, setDWHId] = useState('');
@@ -263,7 +264,9 @@ export default function SF_ShowCart(props) {
     }
   };
 
-  const renderCartThings = (traversingItems) => {
+  const renderCartThings = (traversingItems, totalAmount, name) => {
+    const label = `~${name}'s Warehouses~`
+    console.log({traversingItems})
     return (
       <>
         <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
@@ -271,7 +274,7 @@ export default function SF_ShowCart(props) {
             selectedValue={getDWHId}
             style={{height: 50, width: width * 0.7}}
             onValueChange={(itemValue, itemIndex) => setDWHId(itemValue)}>
-            <Picker.Item label="~Distributor Warehose~" value="" />
+            <Picker.Item label={label} value="" />
             {fillDWH()}
           </Picker>
         </View>
@@ -285,11 +288,11 @@ export default function SF_ShowCart(props) {
             marginBottom: 10,
           }}>
           <Text style={{fontSize: 18, textAlign: 'left'}}>
-            Subtotal({length} items):
+            Subtotal({traversingItems.length} items):
           </Text>
           <Text style={{color: '#c0392b', fontSize: 18, textAlign: 'left'}}>
             {' '}
-            &#8377; {total}
+            &#8377; {totalAmount}
           </Text>
         </View>
         <TouchableOpacity
@@ -348,8 +351,8 @@ export default function SF_ShowCart(props) {
             />
           </View>
           {selectedIndex == 0
-            ? renderCartThings(distributorCartItems)
-            : renderCartThings(retailerCartItems)}
+            ? renderCartThings(distributorCartItems, distributorTotal, 'Distributor')
+            : renderCartThings(retailerCartItems, retailerTotal, 'Retailer')}
         </View>
       )}
     </>

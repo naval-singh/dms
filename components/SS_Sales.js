@@ -65,7 +65,6 @@ function Item({item, props}) {
 
 export default function SS_Sales(props) {
   const [getList, setList] = useState([]);
-  const [getList2, setList2] = useState([]);
   const [loading, setLoading] = useState(true);
 
   var network = useSelector((state) => state.network);
@@ -76,24 +75,12 @@ export default function SS_Sales(props) {
 
   const fetchData = async () => {
     const user = await getSyncData('user');
-    var data = await getSyncData(user.userId);
-    var total = await getSyncData('total');
-
-    if (data != null) {
-      var body = {
-        totalAmount: total,
-        name: '',
-        orderDate: new Date(),
-        orderStatus: 'Not Sync',
-      };
-      setList2([body]);
-    }
 
     if (network) {
       var list = await getDataForSF(
         `https://p91field-dev-ed.my.salesforce.com/services/apexrest/GetSecondaryData?EMPID=${user.userId}`,
       );
-      console.warn('complete data......', list.data.retailers);
+      // console.warn('complete data......', list.data.retailers);
       await storeDatasync('retailerDetails', list.data.retailers);
       setList(list.data.retailers);
       setLoading(false);
@@ -137,17 +124,6 @@ export default function SS_Sales(props) {
           All Retailers
         </Text>
       </View>
-      {!network && (
-        <>
-          <FlatList
-            data={getList2}
-            renderItem={({item}) => <Item item={item} props={props} />}
-            keyExtractor={(item) => Math.random()}
-            showsVerticalScrollIndicator={false}
-          />
-          <View style={{marginVertical: 5}} />
-        </>
-      )}
       {loading ? (
         <View>
           <ActivityIndicator size="large" color="red" />
