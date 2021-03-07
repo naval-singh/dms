@@ -88,6 +88,8 @@ export default function SF_ShowProduct(props) {
 
   const handleAddToCart = () => {
     item['qtydemand'] = qty;
+    item.flag = props.route.params.flag;
+    console.warn({item});
     dispatch({type: 'ADD_CART', payload: [item.productId, item]});
     props.navigation.setParams({x: ''});
     Alert.alert('Product Added Successfully!');

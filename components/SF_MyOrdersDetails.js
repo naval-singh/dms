@@ -77,7 +77,7 @@ export default function SF_MyOrdersDetails(props) {
 
       <View style={styles.mainHeadStyle}>
         <Text style={{fontSize: 14, marginTop: 10, marginBottom: 5}}>
-          All GRNs
+          Ordered Products
         </Text>
       </View>
 
