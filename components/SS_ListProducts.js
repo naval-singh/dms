@@ -108,6 +108,7 @@ export default function SF_ListProducts(props) {
           props.navigation.navigate('SF_ShowProduct', {
             item: item,
             flag: 'retailer',
+            retailerId: retailerDetail.retailerid
           })
         }>
         <View
@@ -199,8 +200,8 @@ export default function SF_ListProducts(props) {
               item.warehouseId === retailerDetail.taggedWarehouse.warehouseId,
           );
           setFilterList(filteredProductList);
-          console.warn(filteredProductList);
-          console.log('filter function');
+          // console.warn(filteredProductList);
+          // console.log('filter function');
         } else {
           setFilterList(list.data.productList);
         }
