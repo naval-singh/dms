@@ -28,8 +28,9 @@ import {Picker} from '@react-native-picker/picker';
 const styles = StyleSheet.create({
   root: {
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
+    height: height*.98
   },
   itemView: {
     flex: 1,
@@ -41,11 +42,6 @@ const styles = StyleSheet.create({
     width: width * 0.25,
     height: height * 0.15,
     resizeMode: 'contain',
-  },
-  root: {
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    padding: 1,
   },
   itemsView: {
     display: 'flex',
@@ -315,7 +311,7 @@ export default function SF_ListProducts({props}) {
           <Text>{companyWarehouse.wn}</Text>
         </View>
         {loading ? (
-          <View style={{flex: 1, justifyContent: 'center', marginTop: 300}}>
+          <View style={{flex: 1, justifyContent: 'center'}}>
             <ActivityIndicator size="large" color="red" />
           </View>
         ) : (
@@ -323,6 +319,7 @@ export default function SF_ListProducts({props}) {
             data={getFilterList}
             renderItem={renderItem}
             keyExtractor={(item) => item.productId.toString()}
+            showsVerticalScrollIndicator={false}
           />
         )}
       </View>

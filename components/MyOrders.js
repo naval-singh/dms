@@ -66,7 +66,7 @@ export default function ShowMyOrders(props) {
   const fetchData = async () => {
     const user = await getSyncData('user');
     var data = await getSyncData(user.userId);
-    var total = await getSyncData('total');
+    var total = await getSyncData('distributorTotal');
 
     if (data != null) {
       var body = {

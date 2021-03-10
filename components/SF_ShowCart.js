@@ -229,47 +229,47 @@ export default function SF_ShowCart(props) {
           ((item.unitPrice * item.GST) / 100 + item.unitPrice) * item.qtydemand,
       });
     });
-    setLoading(false)
-    console.log('distributor', productList)
-    // if (getDWHId != '') {
-    //   var body = {
-    //     productList: productList,
-    //     fromWareHouse: 'a0M2w000001GzVsEAK', // Company ware house Id
-    //     toWareHouse: getDWHId, // Distributor ware house Id which he will select by dropdown on cart
-    //     EMPID: user.userId, // User Id which we pass to get the data
-    //   };
 
-    //   if (!network) {
-    //     setLoading(false);
-    //     await storeDatasync(`${user.userId}`, body);
-    //     await storeDatasync('total', distributorTotal);
+    if (getDWHId != '') {
+      var body = {
+        productList: productList,
+        fromWareHouse: 'a0M2w000001GzVsEAK', // Company ware house Id
+        toWareHouse: getDWHId, // Distributor ware house Id which he will select by dropdown on cart
+        EMPID: user.userId, // User Id which we pass to get the data
+      };
 
-    //     dispatch({type: 'REMOVE_ALL_ITEM'});
-    //     Alert.alert('Order Placed');
-    //     props.navigation.navigate('RootNavigator');
-    //   } else if (network) {
-    //     // console.log('2222', body);
-    //     var result = await postDataForSF(
-    //       'https://p91field-dev-ed.my.salesforce.com/services/apexrest/CreateSalesOrder',
-    //       body,
-    //     );
-    //     setLoading(false);
-    //     console.warn(result);
-    //     if (result.status) {
-    //       dispatch({type: 'REMOVE_ALL_ITEM'});
-    //       Alert.alert('Order Placed');
-    //       props.navigation.navigate('RootNavigator');
-    //     }
-    //   }
-    // } else {
-    //   setLoading(false);
-    //   Alert.alert('Please select your warehouse!');
-    // }
+      if (!network) {
+        setLoading(false);
+        await storeDatasync(`${user.userId}`, body);
+        await storeDatasync('distributorTotal', distributorTotal);
+
+        dispatch({type: 'REMOVE_ALL_ITEM'});
+        Alert.alert('Order Placed');
+        props.navigation.navigate('RootNavigator');
+      } else if (network) {
+        // console.log('2222', body);
+        var result = await postDataForSF(
+          'https://p91field-dev-ed.my.salesforce.com/services/apexrest/CreateSalesOrder',
+          body,
+        );
+        setLoading(false);
+        console.warn(result);
+        if (result.status) {
+          dispatch({type: 'REMOVE_ALL_ITEM'});
+          Alert.alert('Order Placed');
+          props.navigation.navigate('RootNavigator');
+        }
+      }
+    } else {
+      setLoading(false);
+      Alert.alert('Please select your warehouse!');
+    }
   };
 
   const placeOrder = async () => {
     setLoading(true);
     const user = await getSyncData('user');
+    console.log({fromwarehouseid : getListRetailer[0].warehouseId})
     var productList = [];
     getListRetailer.map(function (item) {
       productList.push({
@@ -284,42 +284,42 @@ export default function SF_ShowCart(props) {
           ((item.unitPrice * item.GST) / 100 + item.unitPrice) * item.qtydemand,
       });
     });
-    setLoading(false);
-    console.log('retailer',productList)
-    // if (getDWHId != '') {
-    //   var body = {
-    //     productList: productList,
-    //     fromWareHouse: 'a0M2w000001GzVsEAK', // Company ware house Id
-    //     toWareHouse: getDWHId, // Distributor ware house Id which he will select by dropdown on cart
-    //     EMPID: user.userId, // User Id which we pass to get the data
-    //   };
 
-  //     if (!network) {
-  //       setLoading(false);
-  //       await storeDatasync(`${user.userId}`, body);
-  //       await storeDatasync('total', retailerTotal);
+    // console.log('retailer',productList)
+    if (retailerWarehouseId != '') {
+      var body = {
+        productList: productList,
+        fromWareHouse: getListRetailer[0].warehouseId,
+        toWareHouse: retailerWarehouseId,
+        EMPID: user.userId,
+      };
+      // console.warn({body})
 
-  //       dispatch({type: 'REMOVE_ALL_ITEM'});
-  //       Alert.alert('Order Placed');
-  //       props.navigation.navigate('RootNavigator');
-  //     } else if (network) {
-  //       // console.log('2222', body);
-  //       var result = await postDataForSF(
-  //         'https://p91field-dev-ed.my.salesforce.com/services/apexrest/CreateSalesOrder',
-  //         body,
-  //       );
-  //       setLoading(false);
-  //       console.warn(result);
-  //       if (result.status) {
-  //         dispatch({type: 'REMOVE_ALL_ITEM'});
-  //         Alert.alert('Order Placed');
-  //         props.navigation.navigate('RootNavigator');
-  //       }
-  //     }
-  //   } else {
-  //     setLoading(false);
-  //     Alert.alert('Please select your warehouse!');
-  //   }
+      if (!network) {
+        setLoading(false);
+        await storeDatasync(`${user.userId}`, body);
+        await storeDatasync('retailerTotal', retailerTotal);
+
+        dispatch({type: 'REMOVE_ALL_ITEM'});
+        Alert.alert('Order Placed');
+        props.navigation.navigate('SS_Sales');
+      } else if (network) {
+        var result = await postDataForSF(
+          'https://p91field-dev-ed.my.salesforce.com/services/apexrest/CreateSalesOrder',
+          body,
+        );
+        setLoading(false);
+        console.warn(result);
+        if (result.status) {
+          dispatch({type: 'REMOVE_ALL_ITEM'});
+          Alert.alert('Order Placed');
+          props.navigation.navigate('RootNavigator');
+        }
+      }
+    } else {
+      setLoading(false);
+      Alert.alert('Please select your warehouse!');
+    }
   };
 
   const renderCartThings = (traversingItems, totalAmount, name) => {
