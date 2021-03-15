@@ -35,8 +35,9 @@ import {Picker} from '@react-native-picker/picker';
 const styles = StyleSheet.create({
   root: {
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
+    height: height*.98
   },
   itemView: {
     flex: 1,
@@ -48,11 +49,6 @@ const styles = StyleSheet.create({
     width: width * 0.25,
     height: height * 0.15,
     resizeMode: 'contain',
-  },
-  root: {
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    padding: 1,
   },
   itemsView: {
     display: 'flex',
@@ -108,6 +104,7 @@ export default function SF_ListProducts(props) {
           props.navigation.navigate('SF_ShowProduct', {
             item: item,
             flag: 'retailer',
+            retailerId: retailerDetail.retailerid
           })
         }>
         <View
@@ -199,12 +196,18 @@ export default function SF_ListProducts(props) {
               item.warehouseId === retailerDetail.taggedWarehouse.warehouseId,
           );
           setFilterList(filteredProductList);
-          console.warn(filteredProductList);
-          console.log('filter function');
+          // console.warn(filteredProductList);
+          // console.log('filter function');
         } else {
           setFilterList(list.data.productList);
         }
       } else {
+        // setSelectedWareHouse(data_dhouse[0].warehouseId);
+        // const filteredProductList = list.data.productList.filter(
+        //   (item) =>
+        //     item.warehouseId === data_dhouse[0].warehouseId,
+        // );
+        // setFilterList(filteredProductList);
         setList(list.data.productList);
         setFilterList(list.data.productList);
       }
@@ -325,7 +328,8 @@ export default function SF_ListProducts(props) {
         (item) => item.warehouseId === value,
       );
       setFilterList(filteredProductList);
-    } else {
+    }
+    else {
       setFilterList(getList);
     }
   };
@@ -384,6 +388,7 @@ export default function SF_ListProducts(props) {
             data={getFilterList}
             renderItem={renderItem}
             keyExtractor={(item) => item.productId.toString()}
+            showsVerticalScrollIndicator={false}
           />
         )}
       </View>

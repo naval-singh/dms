@@ -65,9 +65,12 @@ export default function SF_ShowCart(props) {
   var dispatch = useDispatch();
   var distributorTotal = distributorCartItems.reduce(calculate, 0);
   var retailerTotal = retailerCartItems.reduce(calculate, 0);
-  const [getList, setList] = useState(cartitems);
+  const [getListDistributor, setListDistributor] = useState(distributorCartItems);
+  const [getListRetailer, setListRetailer] = useState(retailerCartItems);
   const [getDWH, setDWH] = useState([]);
   const [getDWHId, setDWHId] = useState('');
+  const [retailerWarehouse, setRetailerWarehouse] = useState([]);
+  const [retailerWarehouseId, setRetailerWarehouseId] = useState('');
   function calculate(a, b) {
     var GST = (b.unitPrice * b.GST) / 100;
 
@@ -79,6 +82,12 @@ export default function SF_ShowCart(props) {
   const fetchData = async () => {
     const data_dhouse = await getSyncData('data_distributorWarehouse');
     setDWH(data_dhouse);
+
+    const retailer_data = await getSyncData('retailerDetails');
+    const retailerDetails = retailer_data.find(item => item.retailerid === retailerCartItems[0].retailerId)
+    // console.warn({retailerDetails: retailerDetails.ownWarehouse})
+    setRetailerWarehouse(retailerDetails.ownWarehouse)
+    // console.log({id: retailerCartItems[0].retailerId})
 
     // const user = await getSyncData('user');
     // if (network) {
@@ -192,8 +201,8 @@ export default function SF_ShowCart(props) {
     fetchData();
   }, []);
 
-  const fillDWH = () => {
-    return getDWH.map((item, key) => {
+  const fillDWH = (wareHouses) => {
+    return wareHouses.map((item, key) => {
       return (
         <Picker.Item
           key={item.warehouseId}
@@ -207,39 +216,32 @@ export default function SF_ShowCart(props) {
     setLoading(true);
     const user = await getSyncData('user');
     var productList = [];
-    getList.map(function (item) {
+    getListDistributor.map(function (item) {
       productList.push({
         whpId: item.whpId,
         unitPrice: item.unitPrice,
         skuCode: item.skuCode,
-
         productId: item.productId,
-
         name: item.name,
-
         GST: item.GST,
-
         quantity: item.qtydemand,
-
         total:
           ((item.unitPrice * item.GST) / 100 + item.unitPrice) * item.qtydemand,
       });
     });
+
     if (getDWHId != '') {
       var body = {
         productList: productList,
-
         fromWareHouse: 'a0M2w000001GzVsEAK', // Company ware house Id
-
         toWareHouse: getDWHId, // Distributor ware house Id which he will select by dropdown on cart
-
         EMPID: user.userId, // User Id which we pass to get the data
       };
 
       if (!network) {
         setLoading(false);
         await storeDatasync(`${user.userId}`, body);
-        await storeDatasync('total', total);
+        await storeDatasync('distributorTotal', distributorTotal);
 
         dispatch({type: 'REMOVE_ALL_ITEM'});
         Alert.alert('Order Placed');
@@ -264,19 +266,85 @@ export default function SF_ShowCart(props) {
     }
   };
 
+  const placeOrder = async () => {
+    setLoading(true);
+    const user = await getSyncData('user');
+    console.log({fromwarehouseid : getListRetailer[0].warehouseId})
+    var productList = [];
+    getListRetailer.map(function (item) {
+      productList.push({
+        whpId: item.whpId,
+        unitPrice: item.unitPrice,
+        skuCode: item.skuCode,
+        productId: item.productId,
+        name: item.name,
+        GST: item.GST,
+        quantity: item.qtydemand,
+        total:
+          ((item.unitPrice * item.GST) / 100 + item.unitPrice) * item.qtydemand,
+      });
+    });
+
+    // console.log('retailer',productList)
+    if (retailerWarehouseId != '') {
+      var body = {
+        productList: productList,
+        fromWareHouse: getListRetailer[0].warehouseId,
+        toWareHouse: retailerWarehouseId,
+        EMPID: user.userId,
+      };
+      // console.warn({body})
+
+      if (!network) {
+        setLoading(false);
+        await storeDatasync(`${user.userId}`, body);
+        await storeDatasync('retailerTotal', retailerTotal);
+
+        dispatch({type: 'REMOVE_ALL_ITEM'});
+        Alert.alert('Order Placed');
+        props.navigation.navigate('SS_Sales');
+      } else if (network) {
+        var result = await postDataForSF(
+          'https://p91field-dev-ed.my.salesforce.com/services/apexrest/CreateSalesOrder',
+          body,
+        );
+        setLoading(false);
+        console.warn(result);
+        if (result.status) {
+          dispatch({type: 'REMOVE_ALL_ITEM'});
+          Alert.alert('Order Placed');
+          props.navigation.navigate('RootNavigator');
+        }
+      }
+    } else {
+      setLoading(false);
+      Alert.alert('Please select your warehouse!');
+    }
+  };
+
   const renderCartThings = (traversingItems, totalAmount, name) => {
-    const label = `~${name}'s Warehouses~`
-    console.log({traversingItems})
+    const label = `~${name}'s Warehouses~`;
+    
     return (
       <>
         <View style={{borderWidth: 0.3, borderRadius: 5, margin: 5}}>
-          <Picker
-            selectedValue={getDWHId}
-            style={{height: 50, width: width * 0.7}}
-            onValueChange={(itemValue, itemIndex) => setDWHId(itemValue)}>
-            <Picker.Item label={label} value="" />
-            {fillDWH()}
-          </Picker>
+          {
+            name === 'Retailer' ? 
+            <Picker
+              selectedValue={retailerWarehouseId}
+              style={{height: 50, width: width * 0.7}}
+              onValueChange={(itemValue, itemIndex) => setRetailerWarehouseId(itemValue)}>
+              <Picker.Item label={label} value="" />
+              {fillDWH(retailerWarehouse)}
+            </Picker> : 
+            <Picker
+              selectedValue={getDWHId}
+              style={{height: 50, width: width * 0.7}}
+              onValueChange={(itemValue, itemIndex) => setDWHId(itemValue)}>
+              <Picker.Item label={label} value="" />
+              {fillDWH(getDWH)}
+            </Picker>
+          }
         </View>
         <View
           style={{
@@ -304,7 +372,9 @@ export default function SF_ShowCart(props) {
             backgroundColor: '#fdcb6e',
             marginBottom: 10,
           }}
-          onPress={() => handleAddToCart()}>
+          onPress={() => {
+            name === 'Retailer' ? placeOrder() : handleAddToCart()
+          }}>
           <Text
             style={{
               textAlign: 'center',
@@ -344,9 +414,9 @@ export default function SF_ShowCart(props) {
               activeTabStyle={{backgroundColor: '#008ECC'}}
               onTabPress={(index) => {
                 setSelectedIndex(index);
-                console.log('all Items.............', cartitems);
-                console.log('distri............', distributorCartItems);
-                console.log('retail............', retailerCartItems);
+                // console.log('all Items.............', cartitems);
+                // console.log('distri............', distributorCartItems);
+                // console.log('retail............', retailerCartItems);
               }}
             />
           </View>
